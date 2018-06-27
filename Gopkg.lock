@@ -17,6 +17,8 @@
     "openstack/identity/v2/tokens",
     "openstack/identity/v3/projects",
     "openstack/identity/v3/tokens",
+    "openstack/loadbalancer/v2/listeners",
+    "openstack/loadbalancer/v2/loadbalancers",
     "openstack/loadbalancer/v2/monitors",
     "openstack/loadbalancer/v2/pools",
     "openstack/utils",
@@ -153,6 +155,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3b184a833b6d7728a5fecbca99fca20b0de9a52e9c30988e32887f558b587abe"
+  inputs-digest = "9f4a03d1be16c72b7692d6d1b4a56108bdfe2c8bc17ee4913f073fba6fa9f04d"
   solver-name = "gps-cdcl"
   solver-version = 1

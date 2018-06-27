@@ -23,12 +23,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	myOpenstack "github.com/lingxiankong/openstackcli-go/openstack"
+	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 )
 
 var (
-	cfgFile  string
-	conf     myOpenstack.OpenStackConfig
+	cfgFile string
+	conf    myOpenstack.OpenStackConfig
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -51,7 +51,7 @@ func Execute() {
 
 func init() {
 	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
 
 	cobra.OnInitialize(initConfig)
 
