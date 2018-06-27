@@ -25,7 +25,7 @@ import (
 // OpenStack is an implementation of cloud provider Interface for OpenStack.
 type OpenStack struct {
 	keystone *gophercloud.ServiceClient
-	octavia  *gophercloud.ServiceClient
+	Octavia  *gophercloud.ServiceClient
 	nova     *gophercloud.ServiceClient
 	neutron  *gophercloud.ServiceClient
 	config   OpenStackConfig
@@ -78,7 +78,7 @@ func NewOpenStack(cfg OpenStackConfig) (*OpenStack, error) {
 
 	os := OpenStack{
 		keystone: keystone,
-		octavia:  lb,
+		Octavia:  lb,
 		nova:     compute,
 		neutron:  network,
 		config:   cfg,
