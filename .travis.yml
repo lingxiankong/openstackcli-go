@@ -1,0 +1,31 @@
+# Setting "sudo" to false forces Travis-CI to use its
+# container-based build infrastructure, which has shorter
+# queue times.
+sudo: false
+
+dist: trusty
+
+# Select Go as the language used to run the build.
+language: go
+go: 1.10.x
+
+git:
+  submodules: false
+
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq -y make
+
+# skip the installation step entirely
+install: true
+
+script: make mycli
+
+deploy:
+  provider: releases
+  api_key:
+    secure: 1d02b2570bb9a4b8e08dcf29e85dc54694c44905
+  file: mycli
+  skip_cleanup: true
+  on:
+    tags: true
