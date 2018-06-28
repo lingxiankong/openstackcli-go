@@ -24,6 +24,7 @@ $(GOBIN):
 
 work: $(GOBIN)
 
+.PHONY: depend
 depend: work
 ifndef HAS_DEP
 	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -36,13 +37,17 @@ mycli: depend $(SOURCES)
 		-o mycli \
 		main.go
 
+.PHONY: fmt
+fmt:
+	tools/check_gofmt.sh
+
+.PHONY: clean
 clean:
 	rm -rf mycli
 
+.PHONY: realclean
 realclean: clean
 	rm -rf vendor
 	if [ "$(GOPATH)" = "$(GOPATH_DEFAULT)" ]; then \
 		rm -rf $(GOPATH); \
 	fi
-
-.PHONY: depend clean realclean
