@@ -19,7 +19,7 @@ before_install:
 # skip the installation step entirely
 install: true
 
-script: make mycli
+script: make fmt && make mycli
 
 deploy:
   provider: releases
