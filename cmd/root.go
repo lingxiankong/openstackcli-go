@@ -56,9 +56,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.runit.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&conf.Username, "user", "u", os.Getenv("OS_USERNAME"), "user name")
+	rootCmd.PersistentFlags().StringVarP(&conf.Username, "user-name", "u", os.Getenv("OS_USERNAME"), "user name")
 	rootCmd.PersistentFlags().StringVarP(&conf.Password, "password", "p", os.Getenv("OS_PASSWORD"), "user password")
-	rootCmd.PersistentFlags().StringVarP(&conf.ProjectName, "project", "", os.Getenv("OS_PROJECT_NAME"), "project name")
+	rootCmd.PersistentFlags().StringVarP(&conf.ProjectName, "project-name", "", os.Getenv("OS_PROJECT_NAME"), "project name")
 	rootCmd.PersistentFlags().StringVarP(&conf.Region, "region", "r", os.Getenv("OS_REGION_NAME"), "region name")
 	rootCmd.PersistentFlags().StringVarP(&conf.AuthURL, "authurl", "a", os.Getenv("OS_AUTH_URL"), "auth url")
 }

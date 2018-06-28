@@ -24,6 +24,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var projectID string
+
 var getLoadBalancersCmd = &cobra.Command{
 	Use:   "loadbalancers",
 	Short: "Get all the load balancers and the sub-resources(listeners, pools, members, etc.).",
@@ -33,14 +35,14 @@ var getLoadBalancersCmd = &cobra.Command{
 			log.WithFields(log.Fields{"error": err}).Fatal("Failed to initialize openstack client")
 		}
 
-		lbs, err := osClient.GetLoadbalancers()
+		lbs, err := osClient.GetLoadbalancers(projectID)
 		if err != nil {
 			log.WithFields(log.Fields{"error": err}).Fatal("Failed to get load balancers.")
 		}
 
 		for _, lb := range lbs {
 			var lbInfoList []string
-			lbInfoList = append(lbInfoList, fmt.Sprintf("- LoadBalancer: %s", lb.ID), fmt.Sprintf("status: %s", lb.ProvisioningStatus))
+			lbInfoList = append(lbInfoList, fmt.Sprintf("- LoadBalancer: %s", lb.ID), fmt.Sprintf("status: %s", lb.ProvisioningStatus), fmt.Sprintf("vip: %s", lb.VipAddress))
 			if lb.Name != "" {
 				lbInfoList = append(lbInfoList, fmt.Sprintf("name: %s", lb.Name))
 			}
@@ -74,7 +76,7 @@ var getLoadBalancersCmd = &cobra.Command{
 					}
 
 					for _, m := range members {
-						fmt.Printf("\t\t\t- Member: %s, port: %d\n", m.ID, m.ProtocolPort)
+						fmt.Printf("\t\t\t- Member: %s, address: %s, port: %d\n", m.ID, m.Address, m.ProtocolPort)
 					}
 				}
 			}
@@ -95,7 +97,7 @@ var getLoadBalancersCmd = &cobra.Command{
 				}
 
 				for _, m := range members {
-					fmt.Printf("\t\t- Member: %s, port: %d\n", m.ID, m.ProtocolPort)
+					fmt.Printf("\t\t- Member: %s, address: %s, port: %d\n", m.ID, m.Address, m.ProtocolPort)
 				}
 			}
 		}
@@ -103,5 +105,6 @@ var getLoadBalancersCmd = &cobra.Command{
 }
 
 func init() {
+	getLoadBalancersCmd.Flags().StringVar(&projectID, "project", "", "Only get loadbalancer resources for the given project(admin only).")
 	getCmd.AddCommand(getLoadBalancersCmd)
 }
