@@ -22,8 +22,13 @@ import (
 )
 
 // GetLoadbalancers get all the lbs.
-func (os *OpenStack) GetLoadbalancers() ([]loadbalancers.LoadBalancer, error) {
-	allPages, err := loadbalancers.List(os.Octavia, nil).AllPages()
+func (os *OpenStack) GetLoadbalancers(project string) ([]loadbalancers.LoadBalancer, error) {
+	opts := loadbalancers.ListOpts{}
+	if project != "" {
+		opts = loadbalancers.ListOpts{ProjectID: project}
+	}
+
+	allPages, err := loadbalancers.List(os.Octavia, opts).AllPages()
 	if err != nil {
 		return nil, err
 	}

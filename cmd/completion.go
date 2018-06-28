@@ -15,33 +15,29 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
 
-	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var getProjectsCmd = &cobra.Command{
-	Use:   "projects",
-	Short: "Get all projects ID and name(admin only).",
+// completionCmd represents the completion command
+var completionCmd = &cobra.Command{
+	Use:   "completion",
+	Short: "Generates bash completion scripts",
+	Long: `To load completion run
+
+. <(mycli completion)
+
+To configure your bash shell to load completions for each session add to your bashrc
+
+# ~/.bashrc or ~/.profile
+. <(mycli completion)
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		osClient, err := myOpenstack.NewOpenStack(conf)
-		if err != nil {
-			log.WithFields(log.Fields{"error": err}).Fatal("Failed to initialize openstack client")
-		}
-
-		projects, err := osClient.GetProjects()
-		if err != nil {
-			log.WithFields(log.Fields{"error": err}).Fatal("Failed to get projects")
-		}
-
-		for _, p := range projects {
-			fmt.Printf("ID: %s, Name: %s\n", p.ID, p.Name)
-		}
+		rootCmd.GenBashCompletion(os.Stdout)
 	},
 }
 
 func init() {
-	getCmd.AddCommand(getProjectsCmd)
+	rootCmd.AddCommand(completionCmd)
 }

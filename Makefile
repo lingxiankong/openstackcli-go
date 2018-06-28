@@ -11,8 +11,7 @@ HAS_DEP := $(shell command -v dep;)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
 SOURCES := $(shell find $(DEST) -name '*.go')
 GOOS ?= $(shell go env GOOS)
-VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
-                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+VERSION ?= $(shell git describe --tags --always --abbrev=8)
 LDFLAGS   := "-w -s -X '${GIT_HOST}/${BASE_DIR}/cmd.version=${VERSION}'"
 
 ifneq ("$(DEST)", "$(PWD)")
