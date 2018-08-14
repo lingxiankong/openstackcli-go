@@ -26,8 +26,8 @@ import (
 type OpenStack struct {
 	keystone *gophercloud.ServiceClient
 	Octavia  *gophercloud.ServiceClient
-	nova     *gophercloud.ServiceClient
-	neutron  *gophercloud.ServiceClient
+	Nova     *gophercloud.ServiceClient
+	Neutron  *gophercloud.ServiceClient
 	config   OpenStackConfig
 }
 
@@ -79,8 +79,8 @@ func NewOpenStack(cfg OpenStackConfig) (*OpenStack, error) {
 	os := OpenStack{
 		keystone: keystone,
 		Octavia:  lb,
-		nova:     compute,
-		neutron:  network,
+		Nova:     compute,
+		Neutron:  network,
 		config:   cfg,
 	}
 
