@@ -105,6 +105,6 @@ var getLoadBalancersCmd = &cobra.Command{
 }
 
 func init() {
-	getLoadBalancersCmd.Flags().StringVar(&projectID, "project", "", "Only get loadbalancer resources for the given project(admin only).")
+	getLoadBalancersCmd.Flags().StringVar(&projectID, "project", "", "Only get loadbalancer resources for the given project(admin required).")
 	getCmd.AddCommand(getLoadBalancersCmd)
 }
