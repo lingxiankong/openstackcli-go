@@ -15,6 +15,7 @@
 package openstack
 
 import (
+	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -104,4 +105,40 @@ func (os *OpenStack) GetMembers(poolID string) ([]pools.Member, error) {
 	}
 
 	return members, nil
+}
+
+// FailoverLoadBalancer fails over the specified load balancer and wait for the load balancer to be ACTIVE
+func (os *OpenStack) FailoverLoadBalancer(id string) error {
+	if res := loadbalancers.Failover(os.Octavia, id); res.Err != nil {
+		return res.Err
+	}
+
+	if err := os.WaitForLoadBalancerState(id, "ACTIVE", 300); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.
+func (os *OpenStack) WaitForLoadBalancerState(lbID, status string, secs int) error {
+	return gophercloud.WaitFor(secs, func() (bool, error) {
+		current, err := loadbalancers.Get(os.Octavia, lbID).Extract()
+		if err != nil {
+			if httpStatus, ok := err.(gophercloud.ErrDefault404); ok {
+				if httpStatus.Actual == 404 {
+					if status == "DELETED" {
+						return true, nil
+					}
+				}
+			}
+			return false, err
+		}
+
+		if current.ProvisioningStatus == status {
+			return true, nil
+		}
+
+		return false, nil
+	})
 }

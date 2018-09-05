@@ -27,10 +27,9 @@
     "openstack/utils",
     "pagination"
   ]
-  revision = "69b1773a4cfb2743ab6661acb860b1873eb9b041"
+  revision = "d629ff82f917578016e3f92bf521cc52459c4290"
 
 [[projects]]
-  branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [
     ".",
@@ -44,7 +43,8 @@
     "json/scanner",
     "json/token"
   ]
-  revision = "ef8a98b0bbce4a65b5aa4c368430a80ddc533168"
+  revision = "8cb6e5b959231cc1119e43259c4a608f9c51a241"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -59,16 +59,16 @@
   version = "v1.8.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
-  revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
+  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
+  revision = "fa473d140ef3c6adf42d6b391fe76707f1f243c8"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/pelletier/go-toml"
@@ -79,8 +79,8 @@
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -107,25 +107,25 @@
   branch = "master"
   name = "github.com/spf13/jwalterweatherman"
   packages = ["."]
-  revision = "7c0cea34c8ece3fbeb2b27ab9b59511d360fb394"
+  revision = "14d3d4c518341bea657dd8a226f5121c0ff8c9f2"
 
 [[projects]]
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "583c0c0531f06d5278b7d917446061adc344b5cd"
-  version = "v1.0.1"
+  revision = "9a97c102cda95a86cec2345a6f09f55a939babf5"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
-  version = "v1.0.2"
+  revision = "907c19d40d9a6c9bb55f040ff4ae45271a4754b9"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "0709b304e793a5edb4a2c0145f281ecdc20838a4"
 
 [[projects]]
   branch = "master"
@@ -134,7 +134,7 @@
     "unix",
     "windows"
   ]
-  revision = "a200a19cb90b19de298170992778b1fda7217bd6"
+  revision = "2b024373dcd9800f0cae693839fac6ede8d64a8c"
 
 [[projects]]
   name = "golang.org/x/text"
