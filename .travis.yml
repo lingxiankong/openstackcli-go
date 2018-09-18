@@ -19,13 +19,13 @@ before_install:
 # skip the installation step entirely
 install: true
 
-script: make fmt && make mycli
+script: make fmt && make osctl
 
 deploy:
   provider: releases
   api_key:
     secure: BAnj4xYPGS56y4Usq7gw9uZLfauQZWpqdg7vraACUELGOQh1TQalyNofg1C0B021sV76rWf7brie0tNy0VcDqlLCteyn1xGDMwdskANcKh14511WcQdxWBkgTZrubp62pW9pPezjreQF6wuSMTCguHEfhcvoujx6uIvAhVogxQz1iA02CssP5gJetU7UrC//5/0b5wj5skmmiinf754+qIg4rhCuYC8g3vbOU9d9BA71Q60zEHA63eJcubVQX7q1jtL0Z/9nqw0UYys61Ohp9rm8pMwakxjzi0XcXWZA/1YZpfbiCKLmIYJ4RGP345l08vIkbiYAp9hwQAguPfqXfcfcvz8mkSggD2BpIzM1B1AH5z+egHthZYZ6IPvlOYRViApJoA6b+8lrZMxp774A7ETYzyoUoHmDtKHXNoiAM+1ZMsH2SQeQqdH3mI2JcfKYjoaW7agfRRitloTC7i9f2rL3+w2kYwNkBfvicktKpfZ1J9cKQ6uVfCb0prwL5OzbGBfxVQjhXtrveTcHElFvHhtwehShf7PH5NJmDP5oH/h5uQ2PUqSxWmpjtpKXyBGdVGft/Q+92iqjwfB5krbDg86jouz21CTUeW6dCFVxfJbs8GgofUv02rwFBhNEeF5mfTWTs6pfg1WvVc7LZLwv1ydc5rbRqbwu5onVRzePyn4=
-  file: mycli
+  file: osctl
   skip_cleanup: true
   on:
     tags: true
