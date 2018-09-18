@@ -26,12 +26,12 @@ var completionCmd = &cobra.Command{
 	Short: "Generates bash completion scripts",
 	Long: `To load completion run
 
-. <(mycli completion)
+. <(osctl completion)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(mycli completion)
+. <(osctl completion)
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		rootCmd.GenBashCompletion(os.Stdout)

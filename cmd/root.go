@@ -33,7 +33,7 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "mycli",
+	Use:   "osctl",
 	Short: "A simple command line tool written in Go",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:

@@ -31,10 +31,10 @@ ifndef HAS_DEP
 endif
 	dep ensure -v
 
-mycli: depend $(SOURCES)
+osctl: depend $(SOURCES)
 	CGO_ENABLED=0 GOOS=$(GOOS) go build \
 		-ldflags $(LDFLAGS) \
-		-o mycli \
+		-o osctl \
 		main.go
 
 .PHONY: fmt
@@ -43,7 +43,7 @@ fmt:
 
 .PHONY: clean
 clean:
-	rm -rf mycli
+	rm -rf osctl
 
 .PHONY: realclean
 realclean: clean
