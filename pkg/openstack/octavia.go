@@ -16,6 +16,7 @@ package openstack
 
 import (
 	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/amphorae"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 	"github.com/gophercloud/gophercloud/pagination"
@@ -108,12 +109,12 @@ func (os *OpenStack) GetMembers(poolID string) ([]pools.Member, error) {
 }
 
 // FailoverLoadBalancer fails over the specified load balancer and wait for the load balancer to be ACTIVE
-func (os *OpenStack) FailoverLoadBalancer(id string) error {
+func (os *OpenStack) FailoverLoadBalancer(id string, timeout int) error {
 	if res := loadbalancers.Failover(os.Octavia, id); res.Err != nil {
 		return res.Err
 	}
 
-	if err := os.WaitForLoadBalancerState(id, "ACTIVE", 300); err != nil {
+	if err := os.WaitForLoadBalancerState(id, "ACTIVE", timeout); err != nil {
 		return err
 	}
 
@@ -141,4 +142,21 @@ func (os *OpenStack) WaitForLoadBalancerState(lbID, status string, secs int) err
 
 		return false, nil
 	})
+}
+
+// GetLoadBalancerAmphorae return all the amphorae for a load balancer.
+func (os *OpenStack) GetLoadBalancerAmphorae(id string) ([]amphorae.Amphora, error) {
+	listOpts := amphorae.ListOpts{
+		LoadbalancerID: "id",
+	}
+	allPages, err := amphorae.List(os.Octavia, listOpts).AllPages()
+	if err != nil {
+		return nil, err
+	}
+	allAmphorae, err := amphorae.ExtractAmphorae(allPages)
+	if err != nil {
+		return nil, err
+	}
+
+	return allAmphorae, nil
 }

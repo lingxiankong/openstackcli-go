@@ -23,7 +23,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 	"github.com/lingxiankong/openstackcli-go/pkg/util"
 	log "github.com/sirupsen/logrus"
@@ -32,7 +31,9 @@ import (
 
 var (
 	parallelism int
+	includeLBs  []string
 	excludeLBs  []string
+	timeout     int
 )
 
 var failoverLoadBalancersCmd = &cobra.Command{
@@ -56,13 +57,27 @@ var failoverLoadBalancersCmd = &cobra.Command{
 		}
 
 		var notActiveLBs []string
-		var validLBs []loadbalancers.LoadBalancer
+		var validLBs []string
 		for _, lb := range lbs {
-			if lb.ProvisioningStatus != "ACTIVE" {
-				notActiveLBs = append(notActiveLBs, lb.ID)
+			if len(excludeLBs) > 0 && util.FindString(lb.ID, excludeLBs) {
+				continue
 			}
-			if !util.FindString(lb.ID, excludeLBs) {
-				validLBs = append(validLBs, lb)
+			if len(includeLBs) > 0 && util.FindString(lb.ID, includeLBs) {
+				if lb.ProvisioningStatus != "ACTIVE" {
+					notActiveLBs = append(notActiveLBs, lb.ID)
+				} else {
+					validLBs = append(validLBs, lb.ID)
+				}
+			}
+			if len(includeLBs) > 0 && !util.FindString(lb.ID, includeLBs) {
+				continue
+			}
+			if len(includeLBs) == 0 {
+				if lb.ProvisioningStatus != "ACTIVE" {
+					notActiveLBs = append(notActiveLBs, lb.ID)
+				} else {
+					validLBs = append(validLBs, lb.ID)
+				}
 			}
 		}
 		if len(notActiveLBs) != 0 {
@@ -70,12 +85,15 @@ var failoverLoadBalancersCmd = &cobra.Command{
 		}
 		if len(validLBs) == 0 {
 			log.Info("No load balancers need to failover.")
+			return
 		}
+
+		log.WithFields(log.Fields{"loadbalancers": validLBs}).Info("Will failover the load balancers.")
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		lbsCh := make(chan loadbalancers.LoadBalancer)
+		lbsCh := make(chan string)
 		failCh := make(chan bool, parallelism)
 		var waitgroup sync.WaitGroup
 
@@ -88,8 +106,8 @@ var failoverLoadBalancersCmd = &cobra.Command{
 			log.Info("Waiting for the existing operation to be finished...")
 		}()
 
-		// Fill the lbs need to failover up to a channel
-		go func(ch chan loadbalancers.LoadBalancer, lbs []loadbalancers.LoadBalancer) {
+		// Fill the lbs need to failover into a channel
+		go func(ch chan string, lbs []string) {
 			for _, lb := range lbs {
 				ch <- lb
 			}
@@ -99,23 +117,23 @@ var failoverLoadBalancersCmd = &cobra.Command{
 		// Create parallelism goroutines to handle all the lbs. If any of the goroutines fails, the whole process will stop.
 		for i := 0; i < parallelism; i++ {
 			waitgroup.Add(1)
-			go func(ctx context.Context, ch <-chan loadbalancers.LoadBalancer, failCh chan<- bool) {
+			go func(ctx context.Context, ch <-chan string, failCh chan<- bool) {
 				defer waitgroup.Done()
 
 				for {
 					select {
-					case lb, ok := <-ch:
+					case lbID, ok := <-ch:
 						if !ok {
 							return
 						}
 
-						log.WithFields(log.Fields{"loadbalancer": lb.ID}).Info("Start to failover load balancer")
-						if err := osClient.FailoverLoadBalancer(lb.ID); err != nil {
-							log.WithFields(log.Fields{"loadbalancer": lb.ID}).Error("Failed to failover load balancer")
+						log.WithFields(log.Fields{"loadbalancer": lbID}).Info("Start to failover load balancer")
+						if err := osClient.FailoverLoadBalancer(lbID, timeout); err != nil {
+							log.WithFields(log.Fields{"loadbalancer": lbID}).Error("Failed to failover load balancer")
 							failCh <- true
 							return
 						} else {
-							log.WithFields(log.Fields{"loadbalancer": lb.ID}).Info("Finished to failover load balancer")
+							log.WithFields(log.Fields{"loadbalancer": lbID}).Info("Finished to failover load balancer")
 						}
 					case <-ctx.Done():
 						return
@@ -137,7 +155,9 @@ var failoverLoadBalancersCmd = &cobra.Command{
 func init() {
 	failoverLoadBalancersCmd.Flags().IntVar(&parallelism, "parallelism", 2, "Specifies the maximum desired number(1-5) of failover processes at any given time.")
 	failoverLoadBalancersCmd.Flags().StringVar(&projectID, "project", "", "Only do failover for the load balancers belonging to the given project.")
-	failoverLoadBalancersCmd.Flags().StringArrayVarP(&excludeLBs, "exclude-loadbalancers", "e", nil, "Ignore the load balancers.")
+	failoverLoadBalancersCmd.Flags().StringArrayVarP(&excludeLBs, "exclude-loadbalancers", "e", nil, "Load balancer IDs to ignore.")
+	failoverLoadBalancersCmd.Flags().StringArrayVarP(&includeLBs, "include-loadbalancers", "i", nil, "Load balancer IDs to include.")
+	failoverLoadBalancersCmd.Flags().IntVarP(&timeout, "timeout", "t", 600, "Timeout in seconds for the failover process.")
 
 	failoverCmd.AddCommand(failoverLoadBalancersCmd)
 }

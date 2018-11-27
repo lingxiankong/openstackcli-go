@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
-	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/amphorae"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/pagination"
 	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
@@ -76,13 +75,9 @@ var getLoadBalancerCmd = &cobra.Command{
 		}
 
 		// amphorae
-		amAllPages, err := amphorae.List(osClient.Octavia, amphorae.ListOpts{LoadbalancerID: lbID}).AllPages()
+		ams, err := osClient.GetLoadBalancerAmphorae(lbID)
 		if err != nil {
 			log.WithFields(log.Fields{"error": err, "lbID": lbID}).Fatal("Failed to get amphorae")
-		}
-		ams, err := amphorae.ExtractAmphorae(amAllPages)
-		if err != nil {
-			log.WithFields(log.Fields{"error": err, "lbID": lbID}).Fatal("Failed to extract amphorae")
 		}
 
 		fmt.Println("amphorae:")
