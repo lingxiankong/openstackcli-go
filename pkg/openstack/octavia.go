@@ -147,7 +147,7 @@ func (os *OpenStack) WaitForLoadBalancerState(lbID, status string, secs int) err
 // GetLoadBalancerAmphorae return all the amphorae for a load balancer.
 func (os *OpenStack) GetLoadBalancerAmphorae(id string) ([]amphorae.Amphora, error) {
 	listOpts := amphorae.ListOpts{
-		LoadbalancerID: "id",
+		LoadbalancerID: id,
 	}
 	allPages, err := amphorae.List(os.Octavia, listOpts).AllPages()
 	if err != nil {
