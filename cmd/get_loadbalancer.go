@@ -43,7 +43,7 @@ var getLoadBalancerCmd = &cobra.Command{
 		if err != nil {
 			log.WithFields(log.Fields{"error": err, "lbID": lbID}).Fatal("Failed to get the loadbalancer info")
 		}
-		fmt.Println(fmt.Sprintf("vip port: %s", lb.VipPortID))
+		fmt.Println(fmt.Sprintf("vip port: %s, IP: %s", lb.VipPortID, lb.VipAddress))
 
 		// vip sg
 		vipSgs, err := osClient.GetPortSecurityGroups(lb.VipPortID)
