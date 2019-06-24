@@ -15,6 +15,7 @@
 package openstack
 
 import (
+	"fmt"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/amphorae"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
@@ -121,7 +122,7 @@ func (os *OpenStack) FailoverLoadBalancer(id string, timeout int) error {
 	return nil
 }
 
-// WaitForLoadBalancerState will wait until a loadbalancer reaches a given state.
+// WaitForLoadBalancerState will wait until a loadbalancer reaches a given state or ERROR.
 func (os *OpenStack) WaitForLoadBalancerState(lbID, status string, secs int) error {
 	return gophercloud.WaitFor(secs, func() (bool, error) {
 		current, err := loadbalancers.Get(os.Octavia, lbID).Extract()
@@ -134,6 +135,10 @@ func (os *OpenStack) WaitForLoadBalancerState(lbID, status string, secs int) err
 				}
 			}
 			return false, err
+		}
+
+		if current.ProvisioningStatus == "ERROR" {
+			return false, fmt.Errorf("loadbalancer %s goes to ERROR", lbID)
 		}
 
 		if current.ProvisioningStatus == status {

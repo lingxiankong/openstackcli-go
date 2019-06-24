@@ -35,15 +35,15 @@
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.0.5"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/spf13/cobra"
-  version = "0.0.3"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/spf13/viper"
-  version = "1.0.2"
+  branch = "master"
 
 [prune]
   go-tests = true

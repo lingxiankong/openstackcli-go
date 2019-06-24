@@ -58,30 +58,34 @@ var failoverLoadBalancersCmd = &cobra.Command{
 
 		var notActiveLBs []string
 		var validLBs []string
+
 		for _, lb := range lbs {
 			if len(excludeLBs) > 0 && util.FindString(lb.ID, excludeLBs) {
+				log.Warningf("Loadbalancer %s is skipped.", lb.ID)
 				continue
 			}
-			if len(includeLBs) > 0 && util.FindString(lb.ID, includeLBs) {
-				if lb.ProvisioningStatus != "ACTIVE" {
+
+			if len(includeLBs) == 0 {
+				if lb.ProvisioningStatus != "ACTIVE" && lb.ProvisioningStatus != "ERROR" {
 					notActiveLBs = append(notActiveLBs, lb.ID)
 				} else {
 					validLBs = append(validLBs, lb.ID)
 				}
-			}
-			if len(includeLBs) > 0 && !util.FindString(lb.ID, includeLBs) {
-				continue
-			}
-			if len(includeLBs) == 0 {
-				if lb.ProvisioningStatus != "ACTIVE" {
-					notActiveLBs = append(notActiveLBs, lb.ID)
+			} else {
+				if util.FindString(lb.ID, includeLBs) {
+					if lb.ProvisioningStatus != "ACTIVE" && lb.ProvisioningStatus != "ERROR" {
+						notActiveLBs = append(notActiveLBs, lb.ID)
+					} else {
+						validLBs = append(validLBs, lb.ID)
+					}
 				} else {
-					validLBs = append(validLBs, lb.ID)
+					continue
 				}
 			}
 		}
+
 		if len(notActiveLBs) != 0 {
-			log.WithFields(log.Fields{"loadbalancers": notActiveLBs}).Fatal("Not all the load balancers are ACTIVE.")
+			log.WithFields(log.Fields{"loadbalancers": notActiveLBs}).Fatal("Not all the load balancers are ACTIVE or ERROR.")
 		}
 		if len(validLBs) == 0 {
 			log.Info("No load balancers need to failover.")
