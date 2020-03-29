@@ -16,11 +16,14 @@ package openstack
 
 import (
 	"fmt"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/amphorae"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/pools"
 	"github.com/gophercloud/gophercloud/pagination"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/lingxiankong/openstackcli-go/pkg/util"
 )
 
@@ -109,13 +112,45 @@ func (os *OpenStack) GetMembers(poolID string) ([]pools.Member, error) {
 	return members, nil
 }
 
-// FailoverLoadBalancer fails over the specified load balancer and wait for the load balancer to be ACTIVE
-func (os *OpenStack) FailoverLoadBalancer(id string, timeout int) error {
-	if res := loadbalancers.Failover(os.Octavia, id); res.Err != nil {
-		return res.Err
+// FailoverLoadBalancer fails over the specified load balancer and wait for the load balancer to be ACTIVE. Skip if the amphorae of the LB already running with the image.
+func (os *OpenStack) FailoverLoadBalancer(lbID string, image string, timeout int) error {
+	amps, err := os.GetLoadBalancerAmphorae(lbID)
+	if err != nil {
+		return fmt.Errorf("failed to get amphorae for the load balancer %s: %v", lbID, err)
 	}
 
-	if err := os.WaitForLoadBalancerState(id, "ACTIVE", timeout); err != nil {
+	if len(amps) == 0 {
+		log.WithFields(log.Fields{"loadbalancer": lbID}).Warn("No amphorae, skip")
+		return nil
+	}
+
+	var ampsNeedFix []amphorae.Amphora
+	for _, amp := range amps {
+		vm, err := os.GetVM(amp.ComputeID)
+		if err != nil {
+			log.WithFields(log.Fields{"loadbalancer": lbID, "amphora": amp.ID}).Warnf("Failed to get VM %s: %v", amp.ComputeID, err)
+			ampsNeedFix = append(ampsNeedFix, amp)
+		} else {
+			log.WithFields(log.Fields{"loadbalancer": lbID, "amphora": amp.ID}).Infof("Nova VM %s", amp.ComputeID)
+
+			if vm.Image["id"] == image {
+				log.WithFields(log.Fields{"loadbalancer": lbID, "amphora": amp.ID}).Info("Amphora is running with latest image")
+			} else {
+				ampsNeedFix = append(ampsNeedFix, amp)
+			}
+		}
+	}
+
+	if len(ampsNeedFix) == 0 {
+		log.WithFields(log.Fields{"loadbalancer": lbID}).Info("Amphorae up to date, skip")
+		return nil
+	}
+
+	// Failover and wait
+	if res := loadbalancers.Failover(os.Octavia, lbID); res.Err != nil {
+		return res.Err
+	}
+	if err := os.WaitForLoadBalancerState(lbID, "ACTIVE", timeout); err != nil {
 		return err
 	}
 

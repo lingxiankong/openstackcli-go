@@ -20,9 +20,10 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/servergroups"
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/loadbalancers"
 	"github.com/gophercloud/gophercloud/pagination"
-	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 )
 
 var lbID string

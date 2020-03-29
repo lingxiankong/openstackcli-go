@@ -28,6 +28,7 @@ type OpenStack struct {
 	Octavia  *gophercloud.ServiceClient
 	Nova     *gophercloud.ServiceClient
 	Neutron  *gophercloud.ServiceClient
+	Glance   *gophercloud.ServiceClient
 	config   OpenStackConfig
 }
 
@@ -76,11 +77,21 @@ func NewOpenStack(cfg OpenStackConfig) (*OpenStack, error) {
 		return nil, fmt.Errorf("failed to find compute v2 endpoint for region %s: %v", cfg.Region, err)
 	}
 
+	// get glance service client
+	var glance *gophercloud.ServiceClient
+	glance, err = openstack.NewImageServiceV2(provider, gophercloud.EndpointOpts{
+		Region: cfg.Region,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to find glance service endpoint for region %s: %v", cfg.Region, err)
+	}
+
 	os := OpenStack{
 		keystone: keystone,
 		Octavia:  lb,
 		Nova:     compute,
 		Neutron:  network,
+		Glance:   glance,
 		config:   cfg,
 	}
 

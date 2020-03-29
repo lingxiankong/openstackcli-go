@@ -17,9 +17,10 @@ package cmd
 import (
 	"fmt"
 
-	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 )
 
 var getProjectsCmd = &cobra.Command{

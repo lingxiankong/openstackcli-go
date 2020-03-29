@@ -19,9 +19,10 @@ import (
 	"strings"
 
 	"github.com/gophercloud/gophercloud/openstack/loadbalancer/v2/listeners"
-	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 )
 
 var projectID string

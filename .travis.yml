@@ -7,7 +7,7 @@ dist: trusty
 
 # Select Go as the language used to run the build.
 language: go
-go: 1.10.x
+go: 1.14.x
 
 git:
   submodules: false

@@ -7,7 +7,6 @@ export GOPATH ?= $(GOPATH_DEFAULT)
 GOBIN_DEFAULT := $(GOPATH)/bin
 export GOBIN ?= $(GOBIN_DEFAULT)
 
-HAS_DEP := $(shell command -v dep;)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
 SOURCES := $(shell find $(DEST) -name '*.go')
 GOOS ?= $(shell go env GOOS)
@@ -24,14 +23,7 @@ $(GOBIN):
 
 work: $(GOBIN)
 
-.PHONY: depend
-depend: work
-ifndef HAS_DEP
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-endif
-	dep ensure -v
-
-osctl: depend $(SOURCES)
+osctl: work $(SOURCES)
 	CGO_ENABLED=0 GOOS=$(GOOS) go build \
 		-ldflags $(LDFLAGS) \
 		-o osctl \

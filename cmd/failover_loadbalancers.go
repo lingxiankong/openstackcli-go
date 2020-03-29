@@ -17,16 +17,16 @@ package cmd
 import (
 	"context"
 	"errors"
-	"sync"
-
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 
 	myOpenstack "github.com/lingxiankong/openstackcli-go/pkg/openstack"
 	"github.com/lingxiankong/openstackcli-go/pkg/util"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -39,6 +39,12 @@ var (
 var failoverLoadBalancersCmd = &cobra.Command{
 	Use:   "loadbalancers",
 	Short: "Failover load balancers in Octavia service(admin required)",
+	Long: `Advantages of using this commmand over the "openstack loadbalancer failover":
+	- Fail over the selected load balancers automatically.
+	- Support different filtering conditions for load balancer selection e.g. by project, by inclusion or exclusion.
+	- Support concurrency running.
+	- Automatic skip if the load balancer has already been upgraded.
+	- Automatic skip load balancers in invalid status and print information in warning log level.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if parallelism < 1 || parallelism > 6 {
 			return errors.New("invalid --parallelism specified")
@@ -51,42 +57,35 @@ var failoverLoadBalancersCmd = &cobra.Command{
 			log.WithFields(log.Fields{"error": err}).Fatal("Failed to initialize openstack client")
 		}
 
+		// Get the latest amphora image
+		imageID, err := osClient.GetAmphoraImage()
+		if err != nil {
+			log.Fatalf("Failed to get latest amphora image: %v", err)
+		}
+
 		lbs, err := osClient.GetLoadbalancers(projectID)
 		if err != nil {
 			log.WithFields(log.Fields{"error": err}).Fatal("Failed to get load balancers.")
 		}
 
-		var notActiveLBs []string
 		var validLBs []string
 
+		// Find LBs that can be failed over, for LBs in invalid status, show the updated timestamp and skip.
 		for _, lb := range lbs {
 			if len(excludeLBs) > 0 && util.FindString(lb.ID, excludeLBs) {
-				log.Warningf("Loadbalancer %s is skipped.", lb.ID)
+				log.WithFields(log.Fields{"loadbalancer": lb.ID}).Info("excluded")
 				continue
 			}
 
-			if len(includeLBs) == 0 {
+			if len(includeLBs) == 0 || util.FindString(lb.ID, includeLBs) {
 				if lb.ProvisioningStatus != "ACTIVE" && lb.ProvisioningStatus != "ERROR" {
-					notActiveLBs = append(notActiveLBs, lb.ID)
+					log.WithFields(log.Fields{"loadbalancer": lb.ID}).Warnf("Load balancer %s not in ACTIVE or ERROR, updated at %s, skipped", lb.Name, lb.UpdatedAt)
 				} else {
 					validLBs = append(validLBs, lb.ID)
-				}
-			} else {
-				if util.FindString(lb.ID, includeLBs) {
-					if lb.ProvisioningStatus != "ACTIVE" && lb.ProvisioningStatus != "ERROR" {
-						notActiveLBs = append(notActiveLBs, lb.ID)
-					} else {
-						validLBs = append(validLBs, lb.ID)
-					}
-				} else {
-					continue
 				}
 			}
 		}
 
-		if len(notActiveLBs) != 0 {
-			log.WithFields(log.Fields{"loadbalancers": notActiveLBs}).Fatal("Not all the load balancers are ACTIVE or ERROR.")
-		}
 		if len(validLBs) == 0 {
 			log.Info("No load balancers need to failover.")
 			return
@@ -131,9 +130,10 @@ var failoverLoadBalancersCmd = &cobra.Command{
 							return
 						}
 
-						log.WithFields(log.Fields{"loadbalancer": lbID}).Info("Start to failover load balancer")
-						if err := osClient.FailoverLoadBalancer(lbID, timeout); err != nil {
-							log.WithFields(log.Fields{"loadbalancer": lbID}).Error("Failed to failover load balancer")
+						log.WithFields(log.Fields{"loadbalancer": lbID}).Info("Starting failover load balancer")
+
+						if err := osClient.FailoverLoadBalancer(lbID, imageID, timeout); err != nil {
+							log.WithFields(log.Fields{"loadbalancer": lbID}).Errorf("Failed to failover load balancer: %v", err)
 							failCh <- true
 							return
 						} else {
