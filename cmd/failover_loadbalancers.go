@@ -19,6 +19,7 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 
@@ -72,6 +73,11 @@ var failoverLoadBalancersCmd = &cobra.Command{
 
 		// Find LBs that can be failed over, for LBs in invalid status, show the updated timestamp and skip.
 		for _, lb := range lbs {
+			if strings.Contains(lb.Name, "tempest") {
+				log.WithFields(log.Fields{"loadbalancer": lb.ID}).Info("Created by tempest, skip")
+				continue
+			}
+
 			if len(excludeLBs) > 0 && util.FindString(lb.ID, excludeLBs) {
 				log.WithFields(log.Fields{"loadbalancer": lb.ID}).Info("excluded")
 				continue
