@@ -165,8 +165,8 @@ var failoverLoadBalancersCmd = &cobra.Command{
 func init() {
 	failoverLoadBalancersCmd.Flags().IntVar(&parallelism, "parallelism", 2, "Specifies the maximum desired number(1-5) of failover processes at any given time.")
 	failoverLoadBalancersCmd.Flags().StringVar(&projectID, "project", "", "Only do failover for the load balancers belonging to the given project.")
-	failoverLoadBalancersCmd.Flags().StringArrayVarP(&excludeLBs, "exclude-loadbalancers", "e", nil, "Load balancer IDs to ignore.")
-	failoverLoadBalancersCmd.Flags().StringArrayVarP(&includeLBs, "include-loadbalancers", "i", nil, "Load balancer IDs to include.")
+	failoverLoadBalancersCmd.Flags().StringSliceVarP(&excludeLBs, "exclude-loadbalancers", "e", nil, "Load balancer IDs to ignore.")
+	failoverLoadBalancersCmd.Flags().StringSliceVarP(&includeLBs, "include-loadbalancers", "i", nil, "Load balancer IDs to include.")
 	failoverLoadBalancersCmd.Flags().IntVarP(&timeout, "timeout", "t", 600, "Timeout in seconds for the failover process.")
 
 	failoverCmd.AddCommand(failoverLoadBalancersCmd)
