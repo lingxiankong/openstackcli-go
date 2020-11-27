@@ -97,7 +97,7 @@ var failoverLoadBalancersCmd = &cobra.Command{
 			return
 		}
 
-		log.WithFields(log.Fields{"loadbalancers": validLBs}).Info("Will failover the load balancers.")
+		log.WithFields(log.Fields{"loadbalancers": validLBs}).Infof("Will failover %d load balancers.", len(validLBs))
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
@@ -171,4 +171,3 @@ func init() {
 
 	failoverCmd.AddCommand(failoverLoadBalancersCmd)
 }
-
